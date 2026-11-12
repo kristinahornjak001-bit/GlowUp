@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0E0E">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Glow Up">
+<meta name="description" content="Glow Up Challenge – 50 dana do 31.12.">
+<title>Glow Up 50</title>
+
+<!-- Ikonica (SVG kao data URI). JS kasnije generiše i PNG verzije za početni ekran. -->
+<link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230E0E0E'/%3E%3Ccircle cx='50' cy='50' r='30' fill='%23B6F03C'/%3E%3Cpath d='M37 51l9 9 18-19' fill='none' stroke='%230E0E0E' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" id="appleIcon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230E0E0E'/%3E%3Ccircle cx='50' cy='50' r='30' fill='%23B6F03C'/%3E%3C/svg%3E">
+<!-- PWA manifest (osnovni, JS ga zameni punom verzijom sa PNG ikonicama) -->
+<link rel="manifest" id="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Glow%20Up%20Challenge%22%2C%22short_name%22%3A%22Glow%20Up%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230E0E0E%22%2C%22theme_color%22%3A%22%230E0E0E%22%7D">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ BOJE I OSNOVA ============ */
+  :root{
+    --bg:#0E0E0E;
+    --card:#1A1A1A;
+    --card-2:#242424;
+    --line:#2E2E2E;
+    --lime:#B6F03C;
+    --violet:#A78BFA;
+    --text:#F5F5F2;
+    --muted:#8C8C8C;
+    --red:#FF5C5C;
+    --radius:22px;
+    --font:"Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;background:var(--bg)}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font);
+    font-size:16px;line-height:1.45;min-height:100vh;overflow-x:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body.lock{overflow:hidden}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+  input,select{font:inherit;color:inherit}
+  [hidden]{display:none !important}
+
+  .app{
+    max-width:430px;margin:0 auto;
+    padding:calc(18px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom));
+  }
+
+  /* ============ ZAGLAVLJE ============ */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+  .greet{color:var(--muted);font-size:14px;font-weight:500}
+  .icon-btn{
+    width:48px;height:48px;border-radius:50%;background:var(--card);
+    display:grid;place-items:center;flex-shrink:0;transition:transform .15s;
+  }
+  .icon-btn:active{transform:scale(.92)}
+  .icon-btn svg{width:22px;height:22px}
+  .test-badge{font-size:11px;font-weight:700;color:var(--bg);background:var(--violet);padding:3px 8px;border-radius:99px;margin-left:6px}
+
+  h1.day{font-size:46px;font-weight:800;letter-spacing:-1.5px;line-height:1.05}
+  h1.day span{color:var(--muted);font-weight:700}
+  .sub{color:var(--muted);font-size:15px;margin-top:8px;font-weight:500}
+  .sub b{color:var(--text);font-weight:700}
+
+  .bar{height:8px;background:var(--card-2);border-radius:99px;overflow:hidden;margin-top:16px}
+  .bar i{display:block;height:100%;width:0;background:var(--lime);border-radius:99px;
+    transition:width .9s cubic-bezier(.22,1,.36,1)}
+
+  /* ============ KARTICE ============ */
+  .card{background:var(--card);border-radius:var(--radius);padding:18px}
+  .mt{margin-top:14px}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin:30px 2px 12px}
+  .section-head h2{font-size:24px;font-weight:800;letter-spacing:-.5px}
+  .pill{background:var(--card);color:var(--lime);font-weight:700;font-size:14px;padding:6px 12px;border-radius:99px}
+
+  .streak{display:flex;align-items:center;gap:14px;margin-top:22px}
+  .streak .big{font-size:18px;font-weight:700}
+  .streak .small{color:var(--muted);font-size:13px;margin-top:2px}
+  .streak .fire{font-size:30px;width:52px;height:52px;border-radius:16px;background:var(--card-2);display:grid;place-items:center;flex-shrink:0}
+
+  /* ============ ZADACI ============ */
+  .tasks{display:flex;flex-direction:column;gap:10px}
+  .task{
+    width:100%;min-height:64px;display:flex;align-items:center;gap:14px;
+    background:var(--card);border-radius:20px;padding:14px 16px;text-align:left;
+    transition:transform .12s, background .2s;
+  }
+  .task:active{transform:scale(.98)}
+  .check{
+    width:30px;height:30px;border-radius:10px;border:2px solid #3B3B3B;flex-shrink:0;
+    display:grid;place-items:center;transition:background .2s,border-color .2s;
+  }
+  .check svg{width:18px;height:18px;opacity:0}
+  .check path{stroke-dasharray:24;stroke-dashoffset:24}
+  .task .label{flex:1;font-weight:600;font-size:16px;transition:color .2s}
+  .task .emo{font-size:22px;flex-shrink:0}
+  .task.is-done .check{background:var(--lime);border-color:var(--lime)}
+  .task.is-done .check svg{opacity:1}
+  .task.is-done .check path{stroke-dashoffset:0}
+  .task.is-done .label{color:var(--muted)}
+  .task.is-done .emo{opacity:.55}
+  .task.pop .check{animation:pop .38s cubic-bezier(.34,1.56,.64,1)}
+  .task.pop .check path{transition:stroke-dashoffset .3s .08s ease-out}
+  @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+  .day-done{
+    margin-top:12px;border-radius:20px;padding:14px 16px;font-weight:700;
+    background:rgba(182,240,60,.1);color:var(--lime);text-align:center;
+  }
+  .empty{color:var(--muted);font-size:14px;padding:14px 4px}
+
+  /* ============ NEDELJNI (TERETANA) ============ */
+  .weekly-title{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .weekly-title strong{font-size:17px;font-weight:700}
+  .weekly-title span{color:var(--violet);font-weight:700;font-size:15px;white-space:nowrap}
+  .dots{display:flex;gap:10px;margin:14px 0 16px}
+  .dot{width:26px;height:26px;border-radius:50%;border:2px solid #3B3B3B;transition:background .3s,border-color .3s,transform .3s}
+  .dot.on{background:var(--violet);border-color:var(--violet)}
+  .btn{
+    width:100%;min-height:52px;border-radius:16px;font-weight:700;font-size:16px;
+    display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s,opacity .2s;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-violet{background:var(--violet);color:#16112A}
+  .btn-lime{background:var(--lime);color:#111}
+  .btn-ghost{background:var(--card-2);color:var(--text)}
+  .btn-outline{border:2px solid var(--violet);color:var(--violet)}
+  .btn-danger{background:rgba(255,92,92,.12);color:var(--red)}
+  .hint{margin-top:12px;color:var(--violet);font-size:14px;font-weight:600}
+  .hint.ok{color:var(--lime)}
+
+  /* ============ KALENDAR ============ */
+  .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
+  .cal-head span{text-align:center;color:var(--muted);font-size:11px;font-weight:700}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cell{
+    aspect-ratio:1;border-radius:11px;background:transparent;border:1.5px solid var(--line);
+    font-size:12px;font-weight:700;color:#555;position:relative;display:grid;place-items:center;
+    transition:transform .12s;
+  }
+  .cell:not(:disabled):active{transform:scale(.9)}
+  .cell.done{background:var(--lime);border-color:var(--lime);color:#111}
+  .cell.missed{background:var(--card-2);border-color:var(--card-2);color:var(--muted)}
+  .cell.missed::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+  .cell.today{border:2px solid var(--text);color:var(--text)}
+  .cell.today.done{border-color:var(--text);color:#111}
+  .cell.future{cursor:default;opacity:.7}
+  .cell.blank{border:0;visibility:hidden}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;color:var(--muted);font-size:12px;font-weight:600}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+  /* ============ PRE STARTA / KRAJ ============ */
+  .hero{text-align:center;padding:30px 20px}
+  .hero .kicker{color:var(--muted);font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:1px}
+  .hero .huge{font-size:64px;font-weight:800;letter-spacing:-2px;color:var(--lime);line-height:1.1;margin-top:8px}
+  .hero .clock{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px}
+  .hero p{color:var(--muted);margin-top:12px}
+  .final-msg{font-size:18px;font-weight:600;line-height:1.5;margin-top:14px;color:var(--text)}
+  .preview{display:flex;flex-direction:column;gap:8px}
+  .preview div{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:16px;padding:14px 16px;font-weight:600}
+
+  /* ============ DONJI PANEL (podešavanja / izmena dana) ============ */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:50;
+    display:flex;align-items:flex-end;justify-content:center;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fade .2s ease;
+  }
+  .sheet{
+    width:100%;max-width:430px;max-height:90vh;overflow-y:auto;overscroll-behavior:contain;
+    background:#151515;border-radius:26px 26px 0 0;
+    padding:10px 16px calc(24px + env(safe-area-inset-bottom));animation:up .32s cubic-bezier(.22,1,.36,1);
+  }
+  .grabber{width:40px;height:5px;border-radius:9px;background:#333;margin:4px auto 14px}
+  .sheet h3{font-size:22px;font-weight:800;letter-spacing:-.4px}
+  .sheet .sheet-sub{color:var(--muted);font-size:14px;margin:4px 0 16px}
+  .sheet h4{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:22px 2px 10px}
+  @keyframes up{from{transform:translateY(100%)}to{transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  .edit-row{background:var(--card);border-radius:18px;padding:12px;display:grid;grid-template-columns:52px 1fr 48px;gap:8px;margin-bottom:10px}
+  .edit-row input,.edit-row select{
+    background:var(--card-2);border:1.5px solid transparent;border-radius:12px;min-height:48px;padding:0 12px;width:100%;
+    font-size:16px;outline:none;
+  }
+  .edit-row input:focus,.edit-row select:focus{border-color:var(--violet)}
+  .edit-row .emoji-in{text-align:center;padding:0;font-size:22px}
+  .edit-row .opts{grid-column:1 / -1;display:flex;gap:8px;align-items:center}
+  .edit-row .opts select{flex:1}
+  .edit-row .opts input{width:76px;text-align:center}
+  .edit-row .opts label{color:var(--muted);font-size:13px;white-space:nowrap}
+  .del{width:48px;height:48px;border-radius:12px;background:rgba(255,92,92,.1);display:grid;place-items:center;font-size:18px}
+  .stack{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+  .link-btn{color:var(--muted);font-size:14px;font-weight:600;text-decoration:underline;min-height:48px;width:100%}
+
+  /* ============ PROSLAVA ============ */
+  .celebrate{
+    position:fixed;inset:0;z-index:80;background:rgba(10,10,10,.94);
+    display:flex;align-items:center;justify-content:center;padding:24px;animation:fade .3s ease;
+  }
+  .cel-box{max-width:380px;text-align:center;position:relative;z-index:2;animation:rise .5s cubic-bezier(.22,1,.36,1)}
+  .cel-emoji{font-size:64px}
+  .cel-title{font-size:30px;font-weight:800;letter-spacing:-.8px;margin-top:10px;color:var(--lime)}
+  .cel-text{font-size:20px;font-weight:600;line-height:1.5;margin:18px 0 30px}
+  @keyframes rise{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+  #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
+  /* ============ TOAST ============ */
+  .toast{
+    position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));z-index:90;
+    transform:translate(-50%,30px);opacity:0;pointer-events:none;
+    background:#F5F5F2;color:#111;font-weight:700;font-size:15px;padding:12px 20px;border-radius:99px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .3s;
+    white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis;
+  }
+  .toast.show{transform:translate(-50%,0);opacity:1}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Zaglavlje: pozdrav + zupčanik -->
+  <div class="top">
+    <div class="greet" id="greet"></div>
+    <button class="icon-btn" data-action="settings" aria-label="Podešavanja">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#F5F5F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+
+  <!-- PRE STARTA: odbrojavanje -->
+  <section id="viewBefore" hidden>
+    <div class="card hero">
+      <div class="kicker">Glow Up kreće za</div>
+      <div class="huge" id="cdDays"></div>
+      <div class="clock" id="cdClock"></div>
+      <p id="cdDate"></p>
+    </div>
+    <div class="section-head"><h2>Šta te čeka</h2></div>
+    <div class="preview" id="preview"></div>
+  </section>
+
+  <!-- TOKOM I POSLE IZAZOVA -->
+  <section id="viewMain" hidden>
+    <h1 class="day" id="dayTitle"></h1>
+    <div class="sub" id="daySub"></div>
+    <div class="bar"><i id="barFill"></i></div>
+
+    <!-- Završni ekran (posle 31.12.) -->
+    <div class="card hero mt" id="finalCard" hidden>
+      <div class="kicker">Rezultat</div>
+      <div class="huge" id="finalScore"></div>
+      <div class="clock" style="font-size:16px;color:var(--muted)" id="finalStreak"></div>
+      <div class="final-msg" id="finalMsg"></div>
+    </div>
+
+    <!-- Aktivan izazov -->
+    <div id="activeBlock">
+      <div class="card streak">
+        <div class="fire">🔥</div>
+        <div>
+          <div class="big" id="streakNow"></div>
+          <div class="small" id="streakBest"></div>
+        </div>
+      </div>
+
+      <div class="section-head"><h2>Danas</h2><span class="pill" id="todayCount">0/0</span></div>
+      <div class="tasks" id="tasks"></div>
+      <div class="day-done" id="dayDone" hidden>✓ Dan ispunjen. Ponosna sam na tebe.</div>
+
+      <div id="weekly"></div>
+    </div>
+
+    <div class="section-head"><h2>Kalendar</h2><span class="pill" id="calRange" style="color:var(--muted)">12.11 – 31.12</span></div>
+    <div class="card">
+      <div class="cal-head"><span>P</span><span>U</span><span>S</span><span>Č</span><span>P</span><span>S</span><span>N</span></div>
+      <div class="cal" id="cal"></div>
+      <div class="legend">
+        <span><i style="background:var(--lime)"></i>ispunjen</span>
+        <span><i style="background:var(--card-2);box-shadow:inset 0 0 0 3px var(--card-2),inset 0 0 0 10px var(--red)"></i>propušten</span>
+        <span><i style="border:2px solid var(--text)"></i>danas</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Donji panel (popunjava ga JS) -->
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- Proslava -->
+<div class="celebrate" id="celebrate" hidden role="dialog" aria-modal="true">
+  <canvas id="confetti"></canvas>
+  <div class="cel-box">
+    <div class="cel-emoji" id="celEmoji">✨</div>
+    <div class="cel-title" id="celTitle"></div>
+    <div class="cel-text" id="celText"></div>
+    <button class="btn btn-lime" data-action="closeCelebrate">Hvala sebi 💚</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   1) PODEŠAVANJA IZAZOVA – ovde menjaš datume, zadatke i poruke
+   ===================================================================== */
+
+// Početak i kraj izazova (format GGGG-MM-DD, po lokalnom vremenu telefona)
+const START = '2026-11-12';
+const END   = '2026-12-31';
+
+// Početna lista zadataka.
+// type: 'daily' = dnevni (svi moraju da budu čekirani da se dan računa)
+//       'weekly' = nedeljni, target = koliko puta nedeljno (pon–ned)
+const DEFAULT_TASKS = [
+  { id: 'koraci',    emoji: '👟', text: '8.000 koraka', type: 'daily' },
+  { id: 'ishrana',   emoji: '🥗', text: 'Zdrava ishrana, bez dodatih šećera', type: 'daily' },
+  { id: 'master',    emoji: '📚', text: '2h rada na master radu', type: 'daily' },
+  { id: 'freelance', emoji: '🎨', text: '1h freelance dizajn blok', type: 'daily' },
+  { id: 'voda',      emoji: '💧', text: '2L vode', type: 'daily' },
+  { id: 'plan',      emoji: '🌙', text: 'Uveče: 5 min pregled dana i plan za sutra', type: 'daily' },
+  { id: 'teretana',  emoji: '🏋️', text: 'Teretana', type: 'weekly', target: 4 },
+];
+
+// Tekst dugmeta za nedeljni zadatak
+const WEEKLY_BUTTON = '+ Danas sam išla';
+
+// Motivacione poruke (biraju se nasumično, nikad ista dva puta zaredom)
+const MESSAGES = [
+  'Svakim danom si bliža cilju. Ostani dosledna. 💚',
+  'Disciplina je ono što ti ostaje kad motivacija nestane. Danas si pokazala disciplinu.',
+  'Nisi odustala ni danas. To je razlika između želje i rezultata.',
+  'Ova rutina gradi ženu kakva želiš da budeš.',
+  'Master rad, telo, klijenti: sve se gradi ovakvim danima.',
+  'Mala pobeda danas, velika promena do 31.12.',
+  'Nije bitno da li ti se išlo. Bitno je da si išla.',
+  'Ponosna sam na tebe. Sutra opet, isto ovako.',
+  'Danas si održala obećanje koje si dala sebi. To je najvažnije obećanje.',
+  'Rezultati ne dolaze od jednog savršenog dana, nego od mnogo ovakvih. ✨',
+  'Ispunila si sve. Sutra nemoj da pregovaraš sama sa sobom.',
+  'Svaka stranica master rada je korak bliže diplomi. Danas si ga napravila. 📚',
+  'Klijenti ne dolaze slučajno. Dolaze onima koji se pojavljuju svaki dan. 🎨',
+  'Bila si umorna, a ipak si završila. To je prava snaga.',
+  'Ne treba ti savršenstvo, treba ti doslednost. Danas si je imala.',
+  'Ovaj dan si uložila u sebe. To je najbolja investicija koju imaš.',
+  'Ono što radiš kad te niko ne gleda, jednog dana svi vide. 💪',
+  'Još jedan dan bez izgovora. Takvi dani prave razliku.',
+  'Glow up nije magija. Glow up je ovo: dan za danom.',
+  'Danas si izabrala sebe. Izaberi sebe i sutra.',
+  'Ne čekaš više „pravi trenutak". Ti ga praviš.',
+  'Navika se gradi u tišini, a rezultat se vidi naglas.',
+  'Sve kockice su na mestu. Odmori se, zaslužila si. 🌙',
+  'Neki dani su teški, ali ti si ih ipak ispunila. Tako se gradi karakter.',
+  'Doslednost je tvoja nova supermoć. 💚',
+  'Nema prečica, i baš zato je ovo što radiš vredno.',
+  'Budi strpljiva sa rezultatima, a stroga sa rutinom. Danas si bila oboje.',
+  'Žena koja ispunjava obećanja sebi može da postigne bilo šta.',
+  'Jedan dan ne menja sve. Ali ovaj dan je deo onoga što sve menja.',
+  'Hvala ti što nisi odustala od sebe ni danas.',
+  'Danas je bio dobar dan, jer si ga ti takvim napravila.',
+  'Ne kriviš okolnosti, nego ispunjavaš plan. Bravo.',
+  'Sutra ujutru ćeš biti zahvalna sebi za večerašnju disciplinu.',
+  'Prvi korak je bio najteži. Sad samo nastavi da hodaš. 👟',
+  'Motivacija te pokrene, ali te navika dovede do cilja. Danas si gradila naviku.',
+];
+
+// Posebne poruke za prekretnice (ključ = redni broj dana izazova; 50 = 31.12.)
+const MILESTONES = {
+  7:  { emoji: '🎉', title: 'Prva nedelja je iza tebe!', text: 'Sedam dana. Mnoge odustanu pre ovoga, a ti nisi. Rutina počinje da se lepi za tebe.' },
+  14: { emoji: '🔥', title: 'Dve nedelje!', text: 'Ovo više nije slučajnost, ovo je odluka koju donosiš svaki dan. Ostani dosledna.' },
+  21: { emoji: '✨', title: '21 dan: navika je rođena', text: 'Kažu da treba 21 dan da se stvori navika. Ti si upravo stvorila svoju.' },
+  30: { emoji: '💚', title: '30 dana!', text: 'Mesec dana discipline. Pogledaj koliko si daleko stigla i zamisli gde ćeš biti 31.12.' },
+  40: { emoji: '🏁', title: '40 dana, finiš je blizu', text: 'Još samo deset. Ovo je deo gde se vidi ko je stvarno rešila. Ti jesi.' },
+  50: { emoji: '👑', title: 'Poslednji dan!', text: 'Uspela si. 50 dana rada na telu, master radu i klijentima. Žena koju vidiš u ogledalu je ovo sama izgradila. Srećna Nova godina, šampionko.' },
+};
+
+// Kratke poruke (toast) kad se čekira pojedinačni zadatak
+const TOASTS = [
+  'Jedan manje 💚',
+  'Samo tako ✨',
+  'Čekirano! Idemo dalje',
+  'Bravo, korak bliže 💪',
+  'Odlično, nastavi',
+  'Tako se to radi 🔥',
+];
+
+/* =====================================================================
+   2) ČUVANJE STANJA (localStorage)
+   ===================================================================== */
+const STORAGE_KEY = 'glowup50_v1';
+
+function freshState(tasks) {
+  return {
+    tasks: tasks || DEFAULT_TASKS.map(t => ({ ...t })),
+    checks: {},      // { '2026-11-12': ['koraci', 'voda', ...] } – dnevna čekiranja
+    weekly: {},      // { '2026-11-12': ['teretana'] } – dani kad je nedeljni zadatak urađen
+    done: {},        // { '2026-11-12': true } – ispunjeni dani
+    celebrated: {},  // { '2026-11-12': true } – dani kad je već prikazana proslava
+    lastMsg: -1,     // indeks poslednje prikazane poruke
+  };
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return { ...freshState(), ...JSON.parse(raw) };
+  } catch (e) { /* oštećen ili nedostupan storage – krećemo iz početka */ }
+  return freshState();
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+let state = load();
+
+/* =====================================================================
+   3) DATUMI – sve po lokalnom datumu uređaja, ključevi GGGG-MM-DD
+   ===================================================================== */
+const DAYS   = ['nedelja', 'ponedeljak', 'utorak', 'sreda', 'četvrtak', 'petak', 'subota'];
+const MONTHS = ['januar', 'februar', 'mart', 'april', 'maj', 'jun', 'jul', 'avgust', 'septembar', 'oktobar', 'novembar', 'decembar'];
+
+const pad = n => String(n).padStart(2, '0');
+const keyOf = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+// Podne umesto ponoći – tako prelazak na letnje/zimsko vreme ne pomera datum
+function parseKey(k) { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d, 12); }
+function addDays(k, n) { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); }
+function diffDays(a, b) { return Math.round((parseKey(b) - parseKey(a)) / 864e5); } // b − a
+// Ponedeljak nedelje u kojoj je dati dan (nedelja = pon–ned)
+function weekStart(k) { const dow = (parseKey(k).getDay() + 6) % 7; return addDays(k, -dow); }
+
+const TOTAL = diffDays(START, END) + 1;           // 50
+const dayNumber = k => diffDays(START, k) + 1;    // 12.11. = dan 1
+
+// Test-režim: dodaj ?datum=2026-11-20 na kraj adrese da „putuješ kroz vreme"
+let timeOffset = 0;
+const testDate = new URLSearchParams(location.search).get('datum');
+if (testDate && /^\d{4}-\d{2}-\d{2}$/.test(testDate)) {
+  const real = new Date(), fake = parseKey(testDate);
+  fake.setHours(real.getHours(), real.getMinutes(), real.getSeconds(), real.getMilliseconds());
+  timeOffset = fake - real;
+}
+const now = () => new Date(Date.now() + timeOffset);
+const todayKey = () => keyOf(now());
+
+function phase(t) { return t < START ? 'before' : (t > END ? 'after' : 'active'); }
+
+// Srpska množina: 1 dan, 21 dan, 2 dana, 11 dana...
+const dana = n => (n % 10 === 1 && n % 100 !== 11) ? 'dan' : 'dana';
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+function fmtLong(k) { const d = parseKey(k); return cap(DAYS[d.getDay()]) + ', ' + d.getDate() + '. ' + MONTHS[d.getMonth()]; }
+
+/* =====================================================================
+   4) LOGIKA IZAZOVA
+   ===================================================================== */
+const dailyTasks  = () => state.tasks.filter(t => t.type === 'daily');
+const weeklyTasks = () => state.tasks.filter(t => t.type === 'weekly');
+const isChecked = (k, id) => (state.checks[k] || []).includes(id);
+const isWeeklyOn = (k, id) => (state.weekly[k] || []).includes(id);
+const isDone = k => !!state.done[k];
+
+// Ponovo izračunaj da li je dan ispunjen (svi TRENUTNI dnevni zadaci čekirani)
+function updateDone(k) {
+  const list = dailyTasks();
+  if (list.length && list.every(t => isChecked(k, t.id))) state.done[k] = true;
+  else delete state.done[k];
+}
+
+function toggleIn(map, k, id) {
+  const arr = map[k] || [];
+  const i = arr.indexOf(id);
+  if (i >= 0) arr.splice(i, 1); else arr.push(id);
+  if (arr.length) map[k] = arr; else delete map[k];
+  return i < 0; // true = upravo uključeno
+}
+
+// Koliko puta je nedeljni zadatak urađen u nedelji (pon–ned) kojoj pripada dan k
+function weekCount(id, k) {
+  const ws = weekStart(k);
+  let n = 0;
+  for (let i = 0; i < 7; i++) if (isWeeklyOn(addDays(ws, i), id)) n++;
+  return n;
+}
+
+// Poslednji dan koji se računa (danas, ali najkasnije 31.12.)
+const lastCountedDay = t => (t > END ? END : t);
+
+function completedCount(t) {
+  let n = 0;
+  for (let k = START; k <= lastCountedDay(t); k = addDays(k, 1)) if (isDone(k)) n++;
+  return n;
+}
+
+// Trenutni niz: uzastopni ispunjeni dani do danas. Neispunjen današnji dan ne prekida niz.
+function currentStreak(t) {
+  let k = lastCountedDay(t);
+  if (!isDone(k) && t <= END) k = addDays(k, -1);
+  let n = 0;
+  while (k >= START && isDone(k)) { n++; k = addDays(k, -1); }
+  return n;
+}
+
+function longestStreak(t) {
+  let best = 0, run = 0;
+  for (let k = START; k <= lastCountedDay(t); k = addDays(k, 1)) {
+    run = isDone(k) ? run + 1 : 0;
+    if (run > best) best = run;
+  }
+  return best;
+}
+
+// Nasumična poruka, nikad ista kao prošli put
+function pickMessage() {
+  let i;
+  do { i = Math.floor(Math.random() * MESSAGES.length); } while (MESSAGES.length > 1 && i === state.lastMsg);
+  state.lastMsg = i;
+  return MESSAGES[i];
+}
+
+/* =====================================================================
+   5) AKCIJE
+   ===================================================================== */
+let justChecked = null; // za "pop" animaciju samo na upravo čekiranom zadatku
+
+function toggleTask(k, id) {
+  const t = todayKey();
+  const wasDone = isDone(k);
+  const on = toggleIn(state.checks, k, id);
+  updateDone(k);
+  justChecked = on ? id : null;
+  save();
+  render();
+  if (sheetMode === 'day') renderDaySheet(sheetDate);
+
+  // Proslava: samo za današnji dan, samo jednom dnevno
+  if (k === t && !wasDone && isDone(k) && !state.celebrated[k]) {
+    state.celebrated[k] = true;
+    save();
+    celebrate(k);
+  } else if (on) {
+    const left = dailyTasks().filter(x => !isChecked(k, x.id)).length;
+    toast(left === 1 ? 'Još samo jedan! 🔥' : TOASTS[Math.floor(Math.random() * TOASTS.length)]);
+  }
+}
+
+function toggleWeekly(k, id) {
+  const on = toggleIn(state.weekly, k, id);
+  save();
+  render();
+  if (sheetMode === 'day') renderDaySheet(sheetDate);
+  toast(on ? 'Trening upisan 💪' : 'Poništeno');
+}
+
+function celebrate(k) {
+  const m = MILESTONES[dayNumber(k)];
+  $('#celEmoji').textContent = m ? m.emoji : '✨';
+  $('#celTitle').textContent = m ? m.title : 'Dan ispunjen!';
+  $('#celText').textContent  = m ? m.text  : pickMessage();
+  save();
+  $('#toast').classList.remove('show'); // sakrij mali toast ispod proslave
+  $('#celebrate').hidden = false;
+  document.body.classList.add('lock');
+  confetti();
+}
+
+/* =====================================================================
+   6) PRIKAZ
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const CHECK_SVG = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function taskButton(task, k) {
+  const on = isChecked(k, task.id);
+  const pop = on && justChecked === task.id ? ' pop' : '';
+  return `<button class="task${on ? ' is-done' : ''}${pop}" role="checkbox" aria-checked="${on}"
+            data-action="toggle" data-id="${esc(task.id)}" data-date="${k}">
+            <span class="check">${CHECK_SVG}</span>
+            <span class="label">${esc(task.text)}</span>
+            <span class="emo">${esc(task.emoji || '')}</span>
+          </button>`;
+}
+
+function greeting() {
+  const h = now().getHours();
+  return h < 12 ? 'Dobro jutro ☀️' : h < 18 ? 'Dobar dan 👋' : 'Dobro veče 🌙';
+}
+
+function render() {
+  const t = todayKey();
+  const ph = phase(t);
+  $('#greet').innerHTML = esc(greeting()) + (timeOffset ? '<span class="test-badge">TEST ' + t + '</span>' : '');
+  $('#viewBefore').hidden = ph !== 'before';
+  $('#viewMain').hidden = ph === 'before';
+  if (ph === 'before') { renderBefore(); return; }
+
+  const done = completedCount(t);
+  const pct = Math.round(done / TOTAL * 100);
+  requestAnimationFrame(() => { $('#barFill').style.width = pct + '%'; });
+
+  $('#activeBlock').hidden = ph !== 'active';
+  $('#finalCard').hidden = ph !== 'after';
+
+  if (ph === 'active') {
+    const n = dayNumber(t), left = TOTAL - n + 1;
+    $('#dayTitle').innerHTML = `Dan ${n} <span>/ ${TOTAL}</span>`;
+    $('#daySub').innerHTML = `Ispunjeno: <b>${done}</b> ${dana(done)} · Ostalo: <b>${left}</b> ${dana(left)}`;
+
+    const s = currentStreak(t), best = longestStreak(t);
+    $('#streakNow').textContent = `Niz: ${s} ${dana(s)} zaredom`;
+    $('#streakBest').textContent = s === 0 ? 'Kreni danas, prvi dan je najvažniji.' : `Najduži niz: ${best} ${dana(best)}`;
+
+    const list = dailyTasks();
+    const c = list.filter(x => isChecked(t, x.id)).length;
+    $('#todayCount').textContent = `${c}/${list.length}`;
+    $('#tasks').innerHTML = list.length
+      ? list.map(x => taskButton(x, t)).join('')
+      : '<p class="empty">Nema dnevnih zadataka. Dodaj ih u podešavanjima ⚙️</p>';
+    $('#dayDone').hidden = !isDone(t);
+    renderWeekly(t);
+  } else {
+    // Završni ekran
+    $('#dayTitle').innerHTML = 'Challenge završen 🏁';
+    $('#daySub').innerHTML = `Ispunjeno: <b>${done}</b> od ${TOTAL} dana (${pct}%)`;
+    $('#finalScore').textContent = `${done} / ${TOTAL}`;
+    const best = longestStreak(t);
+    $('#finalStreak').textContent = `Najduži niz: ${best} ${dana(best)}`;
+    $('#finalMsg').textContent =
+      pct >= 90 ? 'Neverovatno. Ovo je bila disciplina na najvišem nivou. Ponosna sam na tebe. 👑' :
+      pct >= 70 ? 'Ogroman rezultat. Izgradila si rutinu koja ostaje i posle izazova. 💚' :
+      pct >= 40 ? 'Svaki ispunjen dan se računa. Uzmi ono što si naučila i nastavi u novoj godini. ✨' :
+                  'Bitno je da si krenula. Nova godina je nova prilika da budeš dosledna. 💪';
+  }
+  justChecked = null;
+  renderCalendar(t);
+}
+
+function renderWeekly(t) {
+  const dow = (parseKey(t).getDay() + 6) % 7; // 0 = ponedeljak ... 6 = nedelja
+  $('#weekly').innerHTML = weeklyTasks().map(task => {
+    const target = Math.max(1, +task.target || 1);
+    const cnt = weekCount(task.id, t);
+    const today = isWeeklyOn(t, task.id);
+    let dots = '';
+    for (let i = 0; i < Math.max(target, cnt); i++) dots += `<span class="dot${i < cnt ? ' on' : ''}"></span>`;
+
+    let hint = '';
+    if (cnt >= target) hint = '<div class="hint ok">Cilj za ovu nedelju je ispunjen 🎉</div>';
+    else if (dow >= 4) { // petak, subota, nedelja
+      const r = target - cnt;
+      const word = /trening|teretan/i.test(task.text) ? (r === 1 ? 'trening' : 'treninga') : (r === 1 ? 'put' : 'puta');
+      hint = `<div class="hint">Fali ti još ${r} ${word} ove nedelje 💪</div>`;
+    }
+    return `<div class="section-head"><h2>Ove nedelje</h2></div>
+      <div class="card">
+        <div class="weekly-title"><strong>${esc(task.emoji || '')} ${esc(task.text)}</strong><span>${cnt}/${target} ove nedelje</span></div>
+        <div class="dots">${dots}</div>
+        <button class="btn ${today ? 'btn-outline' : 'btn-violet'}" data-action="weekly" data-id="${esc(task.id)}" data-date="${t}">
+          ${today ? '✓ Danas odrađeno · poništi' : esc(WEEKLY_BUTTON)}
+        </button>
+        ${hint}
+      </div>`;
+  }).join('');
+}
+
+function renderCalendar(t) {
+  const offset = (parseKey(START).getDay() + 6) % 7; // prazna polja pre prvog dana
+  let html = '<span class="cell blank"></span>'.repeat(offset);
+  for (let i = 0; i < TOTAL; i++) {
+    const k = addDays(START, i);
+    const d = parseKey(k).getDate();
+    const future = k > t;
+    let cls = future ? 'future' : isDone(k) ? 'done' : (k < t ? 'missed' : '');
+    if (k === t) cls += ' today';
+    html += `<button class="cell ${cls}" data-action="day" data-date="${k}" ${future ? 'disabled' : ''}
+               aria-label="${fmtLong(k)}${isDone(k) ? ', ispunjen' : ''}">${d}</button>`;
+  }
+  $('#cal').innerHTML = html;
+}
+
+function renderBefore() {
+  const ms = parseKey(START).setHours(0, 0, 0, 0) - now();
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(s / 86400);
+  $('#cdDays').textContent = `${d} ${dana(d)}`;
+  $('#cdClock').textContent = `${pad(Math.floor(s % 86400 / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`;
+  $('#cdDate').textContent = `Start: ${fmtLong(START)} ${START.slice(0, 4)}.`;
+  $('#preview').innerHTML = state.tasks.map(x =>
+    `<div><span>${esc(x.emoji || '')}</span><span>${esc(x.text)}${x.type === 'weekly' ? ` · ${+x.target || 1}x nedeljno` : ''}</span></div>`).join('');
+}
+
+/* =====================================================================
+   7) DONJI PANEL: izmena prošlog dana i podešavanja
+   ===================================================================== */
+let sheetMode = null, sheetDate = null;
+
+function openSheet(mode) {
+  sheetMode = mode;
+  $('#overlay').hidden = false;
+  document.body.classList.add('lock');
+}
+function closeSheet() {
+  if (sheetMode === 'settings') {
+    // Obriši prazne zadatke i ponovo izračunaj današnji dan
+    state.tasks = state.tasks.filter(x => x.text.trim());
+    if (phase(todayKey()) === 'active') updateDone(todayKey());
+    save();
+  }
+  sheetMode = null;
+  $('#overlay').hidden = true;
+  document.body.classList.remove('lock');
+  render();
+}
+
+function renderDaySheet(k) {
+  sheetDate = k;
+  const status = isDone(k) ? '<span style="color:var(--lime)">✓ ispunjen</span>' : 'nije ispunjen';
+  const daily = dailyTasks().map(x => taskButton(x, k)).join('') || '<p class="empty">Nema dnevnih zadataka.</p>';
+  const weekly = weeklyTasks().map(x => {
+    const on = isWeeklyOn(k, x.id);
+    return `<button class="task${on ? ' is-done' : ''}" role="checkbox" aria-checked="${on}" data-action="weekly" data-id="${esc(x.id)}" data-date="${k}">
+      <span class="check" ${on ? 'style="background:var(--violet);border-color:var(--violet)"' : ''}>${CHECK_SVG}</span>
+      <span class="label">${esc(x.text)} (ovog dana)</span><span class="emo">${esc(x.emoji || '')}</span></button>`;
+  }).join('');
+  $('#sheet').innerHTML = `<div class="grabber"></div>
+    <h3>${fmtLong(k)}</h3>
+    <div class="sheet-sub">Dan ${dayNumber(k)} od ${TOTAL} · ${status}</div>
+    <div class="tasks">${daily}</div>
+    ${weekly ? `<h4>Nedeljno</h4><div class="tasks">${weekly}</div>` : ''}
+    <div class="stack"><button class="btn btn-ghost" data-action="closeSheet">Gotovo</button></div>`;
+  justChecked = null;
+}
+
+function renderSettings() {
+  const rows = state.tasks.map(x => `
+    <div class="edit-row" data-id="${esc(x.id)}">
+      <input class="emoji-in" data-field="emoji" value="${esc(x.emoji || '')}" aria-label="Emoji" maxlength="4">
+      <input data-field="text" value="${esc(x.text)}" placeholder="Naziv zadatka" aria-label="Naziv zadatka">
+      <button class="del" data-action="delTask" data-id="${esc(x.id)}" aria-label="Obriši">🗑️</button>
+      <div class="opts">
+        <select data-field="type" aria-label="Tip zadatka">
+          <option value="daily" ${x.type === 'daily' ? 'selected' : ''}>Dnevni</option>
+          <option value="weekly" ${x.type === 'weekly' ? 'selected' : ''}>Nedeljni</option>
+        </select>
+        ${x.type === 'weekly' ? `<input type="number" inputmode="numeric" min="1" max="7" data-field="target" value="${+x.target || 1}" aria-label="Puta nedeljno"><label>puta nedeljno</label>` : ''}
+      </div>
+    </div>`).join('');
+  $('#sheet').innerHTML = `<div class="grabber"></div>
+    <h3>Podešavanja</h3>
+    <div class="sheet-sub">Izmene se čuvaju odmah. Dnevni zadaci moraju svi da budu čekirani da se dan računa.</div>
+    ${rows}
+    <div class="stack">
+      <button class="btn btn-ghost" data-action="addTask">+ Dodaj zadatak</button>
+      <button class="btn btn-lime" data-action="closeSheet">Gotovo</button>
+    </div>
+    <h4>Opasna zona</h4>
+    <button class="btn btn-danger" data-action="reset">Resetuj challenge</button>
+    <button class="link-btn" data-action="defaults">Vrati početnu listu zadataka</button>`;
+}
+
+/* =====================================================================
+   8) DOGAĐAJI
+   ===================================================================== */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) {
+    if (e.target.id === 'overlay') closeSheet(); // tap van panela zatvara ga
+    return;
+  }
+  const { action, id, date } = el.dataset;
+  switch (action) {
+    case 'toggle': toggleTask(date, id); break;
+    case 'weekly': toggleWeekly(date, id); break;
+    case 'day':
+      if (date > todayKey()) return; // budući dani se ne mogu menjati
+      renderDaySheet(date); openSheet('day'); break;
+    case 'settings': renderSettings(); openSheet('settings'); break;
+    case 'closeSheet': closeSheet(); break;
+    case 'closeCelebrate':
+      $('#celebrate').hidden = true;
+      if (!sheetMode) document.body.classList.remove('lock');
+      stopConfetti = true; break;
+    case 'addTask': {
+      const nid = 't' + Date.now().toString(36);
+      state.tasks.push({ id: nid, emoji: '✨', text: '', type: 'daily', target: 3 });
+      save(); renderSettings();
+      const inp = document.querySelector(`.edit-row[data-id="${nid}"] [data-field="text"]`);
+      if (inp) { inp.focus(); inp.scrollIntoView({ block: 'center' }); }
+      break;
+    }
+    case 'delTask': {
+      const task = state.tasks.find(x => x.id === id);
+      if (task && confirm(`Obrisati zadatak „${task.text || 'bez naziva'}"?`)) {
+        state.tasks = state.tasks.filter(x => x.id !== id);
+        save(); renderSettings();
+      }
+      break;
+    }
+    case 'reset':
+      if (confirm('Sigurno želiš da resetuješ challenge?\n\nSva čekiranja, nizovi i istorija biće obrisani. Tvoji zadaci ostaju.')) {
+        state = freshState(state.tasks);
+        save(); closeSheet(); toast('Challenge je resetovan. Novi početak 💚');
+      }
+      break;
+    case 'defaults':
+      if (confirm('Vratiti početnu listu zadataka? Tvoje izmene zadataka će biti zamenjene.')) {
+        state.tasks = DEFAULT_TASKS.map(t => ({ ...t }));
+        save(); renderSettings();
+      }
+      break;
+  }
+});
+
+// Izmene u podešavanjima (polja za tekst, emoji, tip, broj puta)
+document.addEventListener('input', e => {
+  const f = e.target.dataset.field;
+  if (!f) return;
+  const row = e.target.closest('.edit-row');
+  const task = state.tasks.find(x => x.id === row.dataset.id);
+  if (!task) return;
+  if (f === 'target') task.target = Math.min(7, Math.max(1, parseInt(e.target.value, 10) || 1));
+  else task[f] = e.target.value;
+  if (f === 'type') { if (!task.target) task.target = 3; renderSettings(); }
+  save();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!$('#celebrate').hidden) $('[data-action="closeCelebrate"]').click();
+  else if (sheetMode) closeSheet();
+});
+
+/* =====================================================================
+   9) TOAST I KONFETE
+   ===================================================================== */
+let toastTimer;
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+let stopConfetti = false;
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('#confetti'), ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ['#B6F03C', '#A78BFA', '#F5F5F2', '#FF9AD5'];
+  const parts = Array.from({ length: 130 }, () => ({
+    x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .35,
+    vx: (Math.random() - .5) * 11, vy: -Math.random() * 12 - 4,
+    w: 5 + Math.random() * 6, h: 8 + Math.random() * 6,
+    r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+  }));
+  stopConfetti = false;
+  const t0 = performance.now();
+  (function frame(t) {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    const life = (t - t0) / 3200;
+    if (life > 1 || stopConfetti) return;
+    ctx.globalAlpha = 1 - life * life;
+    for (const p of parts) {
+      p.vy += .32; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    requestAnimationFrame(frame);
+  })(t0);
+}
+
+/* =====================================================================
+   10) PWA – ikonica i manifest za "Add to Home Screen"
+   ===================================================================== */
+function setupPWA() {
+  try {
+    const icon = size => {
+      const c = document.createElement('canvas'); c.width = c.height = size;
+      const x = c.getContext('2d'), s = size;
+      x.fillStyle = '#0E0E0E'; x.fillRect(0, 0, s, s);
+      x.fillStyle = '#B6F03C'; x.beginPath(); x.arc(s / 2, s / 2, s * .3, 0, Math.PI * 2); x.fill();
+      x.strokeStyle = '#0E0E0E'; x.lineWidth = s * .065; x.lineCap = 'round'; x.lineJoin = 'round';
+      x.beginPath(); x.moveTo(s * .38, s * .51); x.lineTo(s * .465, s * .595); x.lineTo(s * .635, s * .42); x.stroke();
+      x.fillStyle = '#A78BFA'; x.beginPath(); x.arc(s * .74, s * .27, s * .055, 0, Math.PI * 2); x.fill();
+      return c.toDataURL('image/png');
+    };
+    const base = location.origin + location.pathname;
+    const manifest = {
+      name: 'Glow Up Challenge', short_name: 'Glow Up', lang: 'sr-Latn',
+      start_url: base, scope: base.replace(/[^/]*$/, ''), display: 'standalone',
+      background_color: '#0E0E0E', theme_color: '#0E0E0E',
+      icons: [
+        { src: icon(192), sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: icon(512), sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+      ],
+    };
+    if (location.protocol.startsWith('http')) {
+      $('#manifest').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+    }
+    $('#appleIcon').href = icon(180);
+  } catch (e) { /* PWA nije obavezan za rad aplikacije */ }
+}
+
+/* =====================================================================
+   11) START + praćenje ponoći
+   ===================================================================== */
+let lastDay = todayKey();
+function tick() {
+  const t = todayKey();
+  if (t !== lastDay) {           // prešli smo ponoć → novi dan
+    lastDay = t;
+    if (sheetMode === 'day') closeSheet(); else render();
+  } else if (phase(t) === 'before') renderBefore();
+}
+setInterval(tick, 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+
+// Ako se lista zadataka promenila, osveži status današnjeg dana
+if (phase(todayKey()) === 'active') { updateDone(todayKey()); save(); }
+setupPWA();
+render();
+</script>
+</body>
+</html>
